@@ -1,7 +1,9 @@
 # downpy
 
-Welcome to Tytube!
+Welcome to Tytube! The program needs these two modules: youtube_dl and YoutubeSearch
 
+YoutubeSearch install: https://pypi.org/project/youtube-search/
+youtube-dl install: https://pypi.org/project/youtube_dl/
 **************
 
     Steps
