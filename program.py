@@ -22,7 +22,7 @@ def dl_link(link,auto):
 	    no_playlist = True
 	ydl_opts = {
 	    'format':'bestaudio/best',
-	    'outtmpl':'Tydowned/%(title)s.%(ext)s',
+	    'outtmpl':'/home/tyro/Music/%(title)s.%(ext)s',
 	    'noplaylist': no_playlist,
 	    'progress_hooks': [onFinish],
 	    'postprocessors':[{
