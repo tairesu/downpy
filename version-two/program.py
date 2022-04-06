@@ -1,7 +1,8 @@
+from ast import parse
+from operator import truediv
 from youtube_search import YoutubeSearch
 import youtube_dl
 import argparse
-import os
 
 dataPoints = {
     'search_terms': [],
@@ -15,7 +16,6 @@ dataPoints = {
 
 def grab_video_link(search_query): #gets youtube link from search input 
     results = YoutubeSearch(search_query, max_results=1).to_dict()
-    print(results)
     return 'https://www.youtube.com/watch?v={}'.format(results[0]['id'])
 
 def queries_from_search(search_query):
@@ -88,9 +88,6 @@ def init_args():
 		print("Auto download enabled")
 		dataPoints['auto_download'] = True
 
-	if args.destination and os.path.isdir(args.destination):
-		dataPoints['target_destination'] = args.destination
-
 	return args
 	##parse args, run conditions, cleanup
 	
@@ -98,12 +95,15 @@ def get_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("songs", nargs='*', default=None)
 	parser.add_argument("-a","--auto", action="store_true")
-	parser.add_argument("-d","--destination")
 	
-	args = parser.parse_args()		
+	args = parser.parse_args()
+
+	
+		
 	return args
 
 	
+
 def main():
 	args = init_args()
 	if not args.songs:
