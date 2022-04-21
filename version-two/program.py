@@ -1,8 +1,11 @@
 from ast import parse
 from operator import truediv
+from pyparsing import Or
+from os import path
 from youtube_search import YoutubeSearch
 import youtube_dl
 import argparse
+import subprocess
 
 dataPoints = {
     'search_terms': [],
@@ -49,20 +52,12 @@ def dl_link(link):
 	        }]
 	    }
 
-	if not dataPoints['auto_download']:
-	    response = input(ending)
-	    if response.lower() == "y": #go on with download
-	        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-	            ydl.download([link])
-	        return True
-
-	    else:
-	        return False
-	else:
-	    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-	            ydl.download([link])
-	    return True
-
+	if dataPoints['auto_download'] or input(ending).lower() == "y":
+		with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+			ydl.download([link])
+		return True
+	
+	return False
 def loopDL(search_queries):
     num_queued = len(search_queries)
     plural = 's' if len(search_queries) > 1 else ''
@@ -81,6 +76,7 @@ def loopDL(search_queries):
 
 def init_args():
 	args = get_args()
+	print(args.current)
 	if args.songs:
 		dataPoints['search_terms'] = args.songs
 	
@@ -88,25 +84,31 @@ def init_args():
 		print("Auto download enabled")
 		dataPoints['auto_download'] = True
 
+	if args.destination and path.isdir(args.destination):
+		dataPoints['target_destination'] = args.destination
+
+	if args.current:
+		currentsong = subprocess.run(['playerctl','metadata','title'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+		dataPoints['search_terms'].append(currentsong[0:-1]) #Removes the \n from the decoded result
+
 	return args
 	##parse args, run conditions, cleanup
 	
 def get_args():
 	parser = argparse.ArgumentParser()
-	parser.add_argument("songs", nargs='*', default=None)
-	parser.add_argument("-a","--auto", action="store_true")
+	parser.add_argument("songs", nargs='*', default=None, help="Add as many songs as you want by seperating them into their own double quotes")
+	parser.add_argument("-a","--auto", help="Download songs without being asked to confirm the downloads", action="store_true")
+	parser.add_argument("-d","--destination", help="Sets the destination of your downloads")
+	parser.add_argument("-c", "--current", help="Downloads whatever song is being played", action="store_true")
 	
-	args = parser.parse_args()
-
-	
-		
+	args = parser.parse_args()	
 	return args
 
 	
 
 def main():
 	args = init_args()
-	if not args.songs:
+	if not (args.songs or args.current):
 		search = input("Video: ")
 		dataPoints['search_terms'] = queries_from_search(search)
 	print(dataPoints['search_terms'])
