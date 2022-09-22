@@ -19,6 +19,7 @@ dataPoints = {
 
 def grab_video_link(search_query): #gets youtube link from search input 
     results = YoutubeSearch(search_query, max_results=1).to_dict()
+    dataPoints['results'].append(results)
     return 'https://www.youtube.com/watch?v={}'.format(results[0]['id'])
 
 def queries_from_search(search_query):
