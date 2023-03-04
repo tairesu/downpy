@@ -37,7 +37,7 @@ def display_results():
 
 	Title: {video_data['title']}
 	Duration: {video_data['duration']}
-	URL: http://www.youtube.com/watch?v={video_data['url_suffix']}
+	URL: http://www.youtube.com{video_data['url_suffix']}
 	Channel: {video_data['channel']} 
 	Views: {video_data['views']}
 	Published: {video_data['publish_time']}
