@@ -130,6 +130,7 @@ def init_args():
 		system_variables['target_destination'] = args.destination
 
 	if args.current:
+		
 		currentsong = subprocess.run(['playerctl','metadata','title'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
 		#Removes the \n from the decoded result
