@@ -5,12 +5,17 @@ import asyncio
 import os
 import subprocess
 
-destination = "/home/tyro/music/"
+music_folder_path = "/home/tyro/music/"
+destination = music_folder_path
 delimeter = ";"
+
+def set_destination(path):
+	global destination
+	destination = path
 
 def file_exists(title):
 	modifiedpath = f"{title}*"
-	matched_files = subprocess.run(['find',destination,'-iname',modifiedpath], stdout=subprocess.PIPE).stdout.decode('utf-8')
+	matched_files = subprocess.run(['find',music_folder_path,'-iname',modifiedpath], stdout=subprocess.PIPE).stdout.decode('utf-8')
 	if matched_files == "":
 		return False
 	return True
@@ -57,17 +62,18 @@ class SearchTerm():
 
 	def is_playlist(self):
 		if self.specified_result['type'] == "playlist":
-			self.set_destination(self.destination + self.specified_result['title'] + '/')
-			return not True
-		return not False
+			return False
+		return True
 	 
-	def set_destination(self, path):
-		self.destination = path
-
 	def on_finish(self,dl):
 		if(dl['status'] == 'finished'):
 			print('/nDownload Finished Converting to mp3')
 	def dl_url(self):
+		
+		if(self.specified_result['type']=="playlist"):
+			set_destination(music_folder_path + self.specified_result['title'] + '/')
+
+		print(f"This is the destination i am downloading to: {destination}")
 		ydl_opts = {
 		'xyz': '%(playlist)s',
 	    'format':'bestaudio/best',
@@ -84,7 +90,7 @@ class SearchTerm():
 		if file_exists(self.specified_result['title']):
 			print('You already have this song!')
 			return False
-		print(self.url)
+		
 		with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 			ydl.download(self.url)
 		return True
