@@ -8,16 +8,32 @@ import subprocess
 music_folder_path = "/home/tyro/music/"
 destination = music_folder_path
 delimeter = ";"
+per_page = 3
+max_results = 21
 
-def set_destination(path):
+def initiate_search(search):
+	searchTerms = search.split(delimeter)
+	for i,term in enumerate(searchTerms):
+		search = SearchTerm(term)
+
+def set_destination(path=music_folder_path):
 	global destination
 	destination = path
 
-def file_exists(title):
+def display(results):
+		for i,video in enumerate(results):
+			print(f"[{i}]\n")
+			for attr in video.keys():
+				if attr not in ['shelfTitle','thumbnails','descriptionSnippet','richThumbnail','accessibility','id']:
+					print(f"		{attr.capitalize()}: {video[attr]}")
+
+def song_exists(title):
+	print(title)
 	modifiedpath = f"{title}*"
 	matched_files = subprocess.run(
 		['find',music_folder_path,'-iname',modifiedpath],
 		stdout=subprocess.PIPE).stdout.decode('utf-8')
+	print(matched_files)
 	return (matched_files != "", matched_files)
 
 def is_validURL(url):
@@ -27,35 +43,33 @@ def is_validURL(url):
 	return False
 
 class SearchTerm():
-	def __init__(self, term, max_results=3):
+	def __init__(self, term):
 		self.term = term
-		self.max_results = max_results
 		self.results = self.get_results()
 		self.specified_result = self.filtered_result()
 		self.url = self.get_url()
 		self.noplaylist = self.is_playlist()
 		self.dl_url()
-		#print(file_exists(self.specified_result['title']))
 
 	def get_results(self):
-		#self.results = YoutubeSearch(self.term, self.max_results).to_dict() 
-		self.results = Search(self.term, limit=self.max_results).result()['result']
-		return self.results
-
-	def filtered_result(self):
-		self.display(self.results)
-		index = input("Which of these do you want? [0-2]")
-		if type(int(index)) == int: 
-			assert int(index) < len(self.results)
-			return self.results[int(index)]
-		return False
+		#self.results = YoutubeSearch(self.term, max_results).to_dict() 
+		return Search(self.term, limit=max_results).result()['result']
 	
-	def display(self,arr):
-		for i,video in enumerate(arr):
-			print(f"[{i}]\n")
-			for attr in video.keys():
-				if attr not in ['shelfTitle','thumbnails','descriptionSnippet','richThumbnail','accessibility','id']:
-					print(f"		{attr.capitalize()}: {video[attr]}")
+	def filtered_result(self):
+		selection = {}
+		i = 0
+		while i <= (max_results // per_page) and selection == {}:
+			start, finish = i * per_page, (i * per_page) + per_page
+			section = self.results[start:finish]
+			display(section)
+			index = input(f"Which one do you want (0-{len(section) - 1})?")
+			if index.isdigit():
+				assert int(index) < len(section)
+				selection = section[int(index)]
+			else:
+				i = i + 1
+		assert selection != {}
+		return selection
 	
 	def get_url(self):
 		return self.specified_result['link']
@@ -73,7 +87,6 @@ class SearchTerm():
 		if(self.specified_result['type']=="playlist"):
 			set_destination(music_folder_path + self.specified_result['title'] + '/')
 
-		print(f"This is the destination i am downloading to: {destination}")
 		ydl_opts = {
 		'xyz': '%(playlist)s',
 	    'format':'bestaudio/best',
@@ -87,8 +100,7 @@ class SearchTerm():
 	        'preferredquality':'192',
 	        }]
 	    }
-		print(file_exists(self.specified_result['title']))
-		if file_exists(self.specified_result['title'])[0]:
+		if (song_exists(self.specified_result['title'])[0]):
 			print('You already have this song!')
 			return False
 		
@@ -98,11 +110,6 @@ class SearchTerm():
 		
 	def show_url(self):
 		print(self.url)
-
-def initiate_search(search):
-	searchTerms = search.split(delimeter)
-	for i,term in enumerate(searchTerms):
-		search = SearchTerm(term)
 
 def main():
 	try:
