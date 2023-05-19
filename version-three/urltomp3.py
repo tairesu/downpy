@@ -15,10 +15,10 @@ def set_destination(path):
 
 def file_exists(title):
 	modifiedpath = f"{title}*"
-	matched_files = subprocess.run(['find',music_folder_path,'-iname',modifiedpath], stdout=subprocess.PIPE).stdout.decode('utf-8')
-	if matched_files == "":
-		return False
-	return True
+	matched_files = subprocess.run(
+		['find',music_folder_path,'-iname',modifiedpath],
+		stdout=subprocess.PIPE).stdout.decode('utf-8')
+	return (matched_files != "", matched_files)
 
 def is_validURL(url):
 	if isinstance(url, str):
@@ -68,8 +68,8 @@ class SearchTerm():
 	def on_finish(self,dl):
 		if(dl['status'] == 'finished'):
 			print('/nDownload Finished Converting to mp3')
+	
 	def dl_url(self):
-		
 		if(self.specified_result['type']=="playlist"):
 			set_destination(music_folder_path + self.specified_result['title'] + '/')
 
@@ -87,7 +87,8 @@ class SearchTerm():
 	        'preferredquality':'192',
 	        }]
 	    }
-		if file_exists(self.specified_result['title']):
+		print(file_exists(self.specified_result['title']))
+		if file_exists(self.specified_result['title'])[0]:
 			print('You already have this song!')
 			return False
 		
