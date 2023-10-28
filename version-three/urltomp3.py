@@ -10,6 +10,7 @@ destination = music_folder_path
 delimeter = ";"
 per_page = 3
 max_results = 21
+keep_open = True
 
 #Creates objects from each search term in main() input
 def initiate_search(search):
@@ -68,6 +69,7 @@ class SearchTerm():
 		#self.results = YoutubeSearch(self.term, max_results).to_dict() 
 		return Search(self.term, limit=max_results).result()['result']
 	
+	#Paginates results and handles video selection
 	def filtered_result(self):
 
 		selection = {}
@@ -80,6 +82,8 @@ class SearchTerm():
 			if index.isdigit():
 				assert int(index) < len(section)
 				selection = section[int(index)]
+			elif index.lower() in ["reset","-r","quit"]:
+				main()
 			else:
 				i = i + 1
 		assert selection != {}
@@ -117,14 +121,17 @@ class SearchTerm():
 
 		with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 			ydl.download(self.url)
+
+		if keep_open == True:
+			main("\nWhat else can I get you?") 
 		return True
 		
 	def show_url(self):
 		print(self.url)
 
-def main():
+def main(opening="What can I get for you?: "):
 	try:
-		initiate_search(input("What can I get for you?: "))
+		initiate_search(input(opening))
 	except EOFError or KeyboardInterrupt:
 		print("\nSee ya later!") 
 
