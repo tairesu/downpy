@@ -131,10 +131,13 @@ def init_args():
 
 	if args.current:
 		
-		currentsong = subprocess.run(['playerctl','metadata','title'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+		currentsong = subprocess.run(['playerctl','-i','musikcube','metadata','-f','{{artist}} {{title}}'],
+			stdout=subprocess.PIPE).stdout.decode('utf-8')
+		
+		print(currentsong)
 
 		#Removes the \n from the decoded result
-		system_variables['search_terms'].append(currentsong[0:-1]) 
+		system_variables['search_terms'].append(f'{{currentsong[0:-1]}}') 
 
 	return args
 	##parse args, run conditions, cleanup

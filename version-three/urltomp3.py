@@ -21,6 +21,7 @@ def set_destination(path=music_folder_path):
 	destination = path
 
 def display(results):
+		print(f"***********************************************")
 		for i,video in enumerate(results):
 			print(f"[{i}]\n")
 			for attr in video.keys():
@@ -28,7 +29,6 @@ def display(results):
 					print(f"		{attr.capitalize()}: {video[attr]}")
 
 def song_exists(title):
-	print(title)
 	modifiedpath = f"{title}*"
 	matched_files = subprocess.run(
 		['find',music_folder_path,'-iname',modifiedpath],
@@ -46,6 +46,7 @@ class SearchTerm():
 	def __init__(self, term):
 		self.term = term
 		self.results = self.get_results()
+		print(self.results)
 		self.specified_result = self.filtered_result()
 		self.url = self.get_url()
 		self.noplaylist = self.is_playlist()
@@ -56,6 +57,7 @@ class SearchTerm():
 		return Search(self.term, limit=max_results).result()['result']
 	
 	def filtered_result(self):
+
 		selection = {}
 		i = 0
 		while i <= (max_results // per_page) and selection == {}:
