@@ -11,6 +11,7 @@ delimeter = ";"
 per_page = 3
 max_results = 21
 
+#Creates objects from each search term in main() input
 def initiate_search(search):
 	searchTerms = search.split(delimeter)
 	for i,term in enumerate(searchTerms):
@@ -20,13 +21,25 @@ def set_destination(path=music_folder_path):
 	global destination
 	destination = path
 
+# Displays the metadata how we want it to
+
 def display(results):
-		print(f"***********************************************")
-		for i,video in enumerate(results):
-			print(f"[{i}]\n")
-			for attr in video.keys():
-				if attr not in ['shelfTitle','thumbnails','descriptionSnippet','richThumbnail','accessibility','id']:
-					print(f"		{attr.capitalize()}: {video[attr]}")
+	for i,video in enumerate(results):
+		if video['type'] == "playlist":
+			condition = "Has " + video['videoCount'] + " video(s)"
+		elif video['type'] == "video":
+			condition = video['accessibility']['duration'] + " long\n\t" +  video['viewCount']['short']
+
+		print(f"""
+[{i}]
+	{video['type']}: {video['title']}
+	{condition}
+	{video['link']}
+	uploaded by '{video['channel']['name']}'
+				""")
+		
+
+		
 
 def song_exists(title):
 	modifiedpath = f"{title}*"
@@ -46,9 +59,8 @@ class SearchTerm():
 	def __init__(self, term):
 		self.term = term
 		self.results = self.get_results()
-		print(self.results)
 		self.specified_result = self.filtered_result()
-		self.url = self.get_url()
+		self.url = self.specified_result['link']
 		self.noplaylist = self.is_playlist()
 		self.dl_url()
 
@@ -72,9 +84,6 @@ class SearchTerm():
 				i = i + 1
 		assert selection != {}
 		return selection
-	
-	def get_url(self):
-		return self.specified_result['link']
 
 	def is_playlist(self):
 		if self.specified_result['type'] == "playlist":
@@ -105,7 +114,7 @@ class SearchTerm():
 		if (song_exists(self.specified_result['title'])[0]):
 			print('You already have this song!')
 			return False
-		
+
 		with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 			ydl.download(self.url)
 		return True
